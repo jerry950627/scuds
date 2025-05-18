@@ -27,7 +27,7 @@ app = Flask(__name__)
 
 # ✅ 初始化 LINE 驗證
 configuration = Configuration(access_token=os.getenv("LINE_CHANNEL_ACCESS_TOKEN"))
-handler = WebhookHandler(os.getenv("LINE_CHANNEL_SECRET"))
+line_handler = WebhookHandler(os.getenv("LINE_CHANNEL_SECRET"))
 
 if not os.getenv("LINE_CHANNEL_SECRET") or not os.getenv("LINE_CHANNEL_ACCESS_TOKEN"):
     print("❌ 環境變數未正確設置")
@@ -42,7 +42,7 @@ def callback():
     app.logger.info(f"Request body: {body}")
     
     try:
-        handler.handle(body, signature)
+        line_handler.handle(body, signature)
     except InvalidSignatureError:
         app.logger.warning("Invalid signature. Please check your channel access token/channel secret.")
         abort(400)
@@ -55,7 +55,7 @@ def health_check():
     return "LINE Bot is running!", 200
 
 # ✅ 設定訊息處理
-@handler.add(MessageEvent, message=TextMessageContent)
+@line_handler.add(MessageEvent, message=TextMessageContent)
 def handle_message(event):
     try:
         # 📌 取得使用者輸入的訊息
